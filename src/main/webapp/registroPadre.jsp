@@ -35,59 +35,75 @@
         </div>
     </nav>
 
-    <main class="seccion-presentacion">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
+    <main class="contenedor-registro-centrado">
+        
+        <div id="tarjeta-registro">
+            <h2>Crear Cuenta de Adulto</h2>
+            <p>Regístrate para poder configurar el perfil de tus hijos.</p>
+            
+            <form action="procesarRegistro.jsp" method="POST">
                 
-                <div id="tarjeta-login">
-                    <h3 id="titulo-login">Crear Cuenta de Adulto</h3>
-                    <p class="text-muted text-center mb-4">Regístrate para poder configurar el perfil de tus hijos.</p>
-                    
-                    <form action="procesarRegistro.jsp" method="POST">
-                        
-                        <div class="mb-3">
-                            <label for="correo" class="form-label">Correo Electrónico del Adulto:</label>
-                            <input type="email" class="form-control" id="correo" name="txt_registro_correo" required placeholder="nombre@ejemplo.com">
-                            <div class="form-text">Debe ser un correo electrónico válido.</div>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label for="clave" class="form-label">Contraseña Segura:</label>
-                            <input type="password" class="form-control" id="clave" name="txt_registro_clave" required minlength="8" placeholder="Mínimo 8 caracteres">
-                            <div class="form-text">Por seguridad, tu clave debe tener al menos 8 caracteres.</div>
-                        </div>
-
-                        <button type="submit" id="boton-ingresar" class="btn boton-accesible">
-                            <i class="bi bi-person-plus-fill"></i> Registrarme e Iniciar
-                        </button>
-                        
-                    </form>
-                    
-                    <div class="text-center mt-4">
-                        <p class="mb-0 text-muted">¿Ya tienes una cuenta?</p>
-                        <a href="index.jsp" class="text-decoration-none fw-bold" style="color: #4a90e2;">Inicia sesión aquí</a>
-                    </div>
+                <div class="mb-3">
+                    <label for="correo" class="form-label fw-bold">Correo Electrónico del Adulto:</label>
+                    <input type="email" class="form-control" id="correo" name="txt_registro_correo" required placeholder="nombre@ejemplo.com">
+                    <div class="form-text text-secondary">Debe ser un correo electrónico válido.</div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="clave" class="form-label fw-bold">Contraseña Segura:</label>
+                    <input type="password" class="form-control" id="clave" name="txt_registro_clave" required minlength="8" placeholder="Mínimo 8 caracteres">
+                    <div class="form-text text-secondary">Por seguridad, tu clave debe tener al menos 8 caracteres.</div>
                 </div>
 
+                <button type="submit" class="boton-registrar">
+                    <i class="bi bi-person-plus-fill me-2"></i>Registrarme e Iniciar
+                </button>
+                
+            </form>
+            
+            <div class="text-center mt-4 border-top pt-3">
+                <p class="mb-1 text-muted">¿Ya tienes una cuenta?</p>
+                <a href="index.jsp" class="text-decoration-none fw-bold" style="color: #7000ff;">Inicia sesión aquí</a>
             </div>
         </div>
+
     </main>
 
     <script>
-        function cambiarContraste() {
-            document.body.classList.toggle('modo-alto-contraste');
+    // 1. FUNCIÓN INTERACTIVA DEL BOTÓN
+    function cambiarContraste() {
+        // Alternamos la clase en el body
+        let activo = document.body.classList.toggle('modo-alto-contraste');
+        
+        // Guardamos de forma persistente el estado en el navegador del usuario
+        if (activo) {
+            localStorage.setItem('altoContraste', 'activado');
+        } else {
+            localStorage.setItem('altoContraste', 'desactivado');
         }
+    }
 
-        function reproducirVoz(mensaje) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                let lectura = new SpeechSynthesisUtterance(mensaje);
-                lectura.lang = 'es-ES';
-                window.speechSynthesis.speak(lectura);
-            } else {
-                alert("Lector no soportado por tu navegador.");
-            }
+    // 2. COMPROBACIÓN INMEDIATA AL CARGAR LA PÁGINA (Persistence Check)
+    // Este evento se dispara automáticamente en cuanto el navegador termina de renderizar el HTML
+    document.addEventListener("DOMContentLoaded", function() {
+        // Leemos la pequeña base de datos del navegador
+        let estadoContraste = localStorage.getItem('altoContraste');
+        
+        // Si el usuario ya lo había activado en otra página, lo encendemos de inmediato
+        if (estadoContraste === 'activado') {
+            document.body.classList.add('modo-alto-contraste');
         }
-    </script>
+    });
+
+    // 3. FUNCIÓN DE ACCESIBILIDAD POR VOZ (Mantenemos tu lógica existente)
+    function reproducirVoz(mensaje) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            let lectura = new SpeechSynthesisUtterance(mensaje);
+            lectura.lang = 'es-ES';
+            window.speechSynthesis.speak(lectura);
+        }
+    }
+</script>
 </body>
 </html>

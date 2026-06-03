@@ -80,23 +80,41 @@
     </main>
 
     <script>
-        // Función para activar/desactivar la clase de alto contraste en el body
-        function cambiarContraste() {
-            document.body.classList.toggle('modo-alto-contraste');
+    // 1. FUNCIÓN INTERACTIVA DEL BOTÓN
+    function cambiarContraste() {
+        // Alternamos la clase en el body
+        let activo = document.body.classList.toggle('modo-alto-contraste');
+        
+        // Guardamos de forma persistente el estado en el navegador del usuario
+        if (activo) {
+            localStorage.setItem('altoContraste', 'activado');
+        } else {
+            localStorage.setItem('altoContraste', 'desactivado');
         }
+    }
 
-        // Función para el lector de voz nativo
-        function reproducirVoz(mensaje) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); // Detener audios anteriores
-                let lectura = new SpeechSynthesisUtterance(mensaje);
-                lectura.lang = 'es-ES';
-                window.speechSynthesis.speak(lectura);
-            } else {
-                alert("Lector no soportado por tu navegador.");
-            }
+    // 2. COMPROBACIÓN INMEDIATA AL CARGAR LA PÁGINA (Persistence Check)
+    // Este evento se dispara automáticamente en cuanto el navegador termina de renderizar el HTML
+    document.addEventListener("DOMContentLoaded", function() {
+        // Leemos la pequeña base de datos del navegador
+        let estadoContraste = localStorage.getItem('altoContraste');
+        
+        // Si el usuario ya lo había activado en otra página, lo encendemos de inmediato
+        if (estadoContraste === 'activado') {
+            document.body.classList.add('modo-alto-contraste');
         }
-    </script>
+    });
+
+    // 3. FUNCIÓN DE ACCESIBILIDAD POR VOZ (Mantenemos tu lógica existente)
+    function reproducirVoz(mensaje) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            let lectura = new SpeechSynthesisUtterance(mensaje);
+            lectura.lang = 'es-ES';
+            window.speechSynthesis.speak(lectura);
+        }
+    }
+	</script>
     
     <div class="modal fade" id="modalErrorSistema" tabindex="-1" aria-labelledby="modalErrorLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

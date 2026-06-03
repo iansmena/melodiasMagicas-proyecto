@@ -3,13 +3,13 @@
 <%@ page import="java.sql.ResultSet" %>
 
 <%
-    //Validar que se haya iniciado sesión de verdad
+    // SECCIÓN DE SEGURIDAD Y CONTROL DE SESIÓN
     Integer idPadre = (Integer) session.getAttribute("idUsuarioPadre");
     String correoPadre = (String) session.getAttribute("correoUsuario");
     
     if (idPadre == null) {
         response.sendRedirect("index.jsp?error=sin_sesion");
-        return;
+        return; // Detiene la ejecución del ciclo de vida del JSP de manera segura
     }
 %>
 
@@ -22,128 +22,126 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    
     <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
 
     <div class="barra-accesibilidad">
-        <button onclick="cambiarContraste()" class="boton-accesible btn-warning">
+        <button onclick="cambiarContraste()" class="boton-accesible btn-warning" aria-label="Cambiar contraste">
             <i class="bi bi-eye-fill"></i> Alto Contraste
         </button>
-        <button onclick="reproducirVoz('Hola. Por favor, selecciona tu perfil para empezar a cantar y jugar.')" class="boton-accesible btn-info text-white">
+        <button onclick="reproducirVoz('Selecciona tu perfil infantil para empezar a jugar o añade un nuevo perfil.')" class="boton-accesible btn-info text-white" aria-label="Escuchar instrucción">
             <i class="bi bi-volume-up-fill"></i> Escuchar Instrucción
         </button>
     </div>
 
     <nav class="menu-principal">
         <div class="fila-flexible">
-            <span class="texto-logotipo"><i class="bi bi-music-note-beamed"></i> Melodías Mágicas</span>
-            <div class="text-end">
-                <span class="text-muted me-3">Cuenta: <%= correoPadre %></span>
-                <button class="btn btn-primary boton-accesible me-2" data-bs-toggle="modal" data-bs-target="#modalNuevoHijo">
-                    <i class="bi bi-plus-circle-fill"></i> Registrar Hijo
-                </button>
-                <a href="index.jsp" class="btn btn-outline-danger boton-accesible">Cerrar Sesión</a>
+            <a href="perfiles.jsp" class="texto-logotipo">
+                <i class="bi bi-music-note-beamed"></i> Melodías Mágicas
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted d-none d-md-inline fw-bold">Cuenta: <%= correoPadre %></span>
+                
+                <a href="procesarSalida.jsp" class="btn btn-outline-danger boton-accesible">
+                    <i class="bi bi-box-arrow-left"></i> Salir
+                </a>
             </div>
         </div>
     </nav>
 
-    <main class="container text-center mt-5">
-        <h1 class="display-5 fw-bold mb-5">¿Quién va a jugar hoy?</h1>
-        
-        <div class="row justify-content-center">
+    <main class="container text-center my-5">
+        <h1 class="fw-black display-5 mb-2" style="color: #1a202c; font-weight: 800;">¿Quién va a jugar hoy?</h1>
+        <p class="text-secondary fs-5 mb-5">Elige tu avatar para entrar a tu mundo musical</p>
+
+        <div class="contenedor-perfiles-streaming">
             <%
                 Hijo negocioHijo = new Hijo();
                 ResultSet rsHijos = negocioHijo.listarHijosPorPadre(idPadre);
                 
-                boolean tieneHijos = false;
-                
-                String[] iconosAvatares = {"", "bi-music-note-beamed text-primary", "bi-emoji-smile-fill text-success", "bi-star-fill text-warning", "bi-heart-fill text-danger", "bi-brightness-high-fill text-info"};
-                String[] coloresFondo = {"", "#e0f2fe", "#dcfce7", "#fef9c3", "#fee2e2", "#ecfeff"};
-
-                while(rsHijos != null && rsHijos.next()) {
-                    tieneHijos = true;
-                    int idDelHijo = rsHijos.getInt("hijo_id");
-                    String nombreDelHijo = rsHijos.getString("hijo_nombre");
-                    int numAvatar = rsHijos.getInt("hijo_numero_avatar");
-                    
-                    if(numAvatar < 1 || numAvatar > 5) numAvatar = 1;
+                if (rsHijos != null) {
+                    while (rsHijos.next()) {
+                        int idHijo = rsHijos.getInt("hijo_id");
+                        String nombreHijo = rsHijos.getString("hijo_nombre");
+                        int numeroAvatar = rsHijos.getInt("hijo_numero_avatar");
+                        
+                        // Vinculado dinámicamente a tu Vercel Blob Storage
+                        String rutaAvatar = "https://xpxcidh4nv94qxjy.public.blob.vercel-storage.com/img/avatar/avatar" + numeroAvatar + ".png";
             %>
-                    <div class="col-6 col-sm-4 col-md-3">
-                        <a href="principal.jsp?idHijo=<%= idDelHijo %>" class="tarjeta-perfil-nino">
-                            <div class="imagen-avatar d-flex align-items-center justify-content-center" style="background-color: <%= coloresFondo[numAvatar] %>;">
-                                <i class="bi <%= iconosAvatares[numAvatar] %> fs-1"></i>
-                            </div>
-                            <div class="nombre-perfil-nino"><%= nombreDelHijo %></div>
+                        <a href="principal.jsp?idHijo=<%= idHijo %>" class="tarjeta-perfil-nino" aria-label="Jugar como <%= nombreHijo %>">
+                            <img src="<%= rutaAvatar %>" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=<%= nombreHijo %>'" class="imagen-avatar" alt="Avatar de <%= nombreHijo %>">
+                            <span class="nombre-perfil-nino"><%= nombreHijo %></span>
                         </a>
-                    </div>
             <%
-                }
-                
-                if (!tieneHijos) {
-            %>
-                    <div class="col-12 mt-4">
-                        <div class="alert alert-info d-inline-block p-4">
-                            <i class="bi bi-info-circle fs-3 d-block mb-2"></i>
-                            Todavía no tienes perfiles creados para tus hijos.<br>
-                            Haz clic en el botón superior <strong>"Registrar Hijo"</strong> para empezar.
-                        </div>
-                    </div>
-            <%
+                    }
+                    rsHijos.close();
                 }
             %>
+
+            <a href="#" class="tarjeta-perfil-nino" data-bs-toggle="modal" data-bs-target="#modalNuevoHijo" aria-label="Añadir un nuevo perfil de hijo">
+                <div class="avatar-agregar-nuevo">
+                    <i class="bi bi-plus-lg"></i>
+                </div>
+                <span class="nombre-perfil-nino">Añadir</span>
+            </a>
         </div>
     </main>
 
-    <div class="modal fade" id="modalNuevoHijo" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content text-start">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="modalTitulo">Registrar Perfil de tu Hijo/a</h5>
-                    <button type="white" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+    <div class="modal fade" id="modalNuevoHijo" tabindex="-1" aria-labelledby="modalHijoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px; border: 3px solid #7000ff; overflow: hidden;">
+                
+                <div class="modal-header bg-primary text-white p-4" style="background: linear-gradient(135deg, #7000ff 0%, #ff007f 100%) !important;">
+                    <h5 class="modal-title fw-bold fs-4" id="modalHijoLabel">
+                        <i class="bi bi-magic me-2"></i> Crear Nuevo Perfil Infantil
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
                 <form action="procesarNuevoHijo.jsp" method="POST">
-                    <div class="modal-body">
+                    <div class="modal-body p-4 text-start">
                         
                         <div class="mb-3">
-                            <label for="nombreHijo" class="form-label">Nombre del Niño/a:</label>
-                            <input type="text" class="form-control" id="nombreHijo" name="txt_hijo_nombre" required placeholder="Ej. Carlitos">
+                            <label for="nombreHijo" class="form-label fw-bold text-dark">Nombre del Niño(a):</label>
+                            <input type="text" class="form-control p-3" id="nombreHijo" name="txt_hijo_nombre" required placeholder="Escribe su nombre o apodo" style="border: 2px solid #cbd5e0; border-radius: 12px;">
                         </div>
                         
                         <div class="mb-3">
-                            <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento:</label>
-                            <input type="date" class="form-control" id="fechaNacimiento" name="txt_hijo_fecha" required>
-                            <div class="form-text">Dirigido a niños de hasta 5 años.</div>
+                            <label for="fechaNac" class="form-label fw-bold text-dark">Fecha de Nacimiento:</label>
+                            <input type="date" class="form-control p-3" id="fechaNac" name="txt_hijo_fecha" required style="border: 2px solid #cbd5e0; border-radius: 12px;">
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label d-block">Selecciona su Avatar Favorito:</label>
-                            <div class="d-flex justify-content-between p-2 bg-light rounded">
-                                <label class="mx-1 text-center"><input type="radio" name="rb_hijo_avatar" value="1" checked> <br><i class="bi bi-music-note-beamed text-primary fs-3"></i></label>
-                                <label class="mx-1 text-center"><input type="radio" name="rb_hijo_avatar" value="2"> <br><i class="bi bi-emoji-smile-fill text-success fs-3"></i></label>
-                                <label class="mx-1 text-center"><input type="radio" name="rb_hijo_avatar" value="3"> <br><i class="bi bi-star-fill text-warning fs-3"></i></label>
-                                <label class="mx-1 text-center"><input type="radio" name="rb_hijo_avatar" value="4"> <br><i class="bi bi-heart-fill text-danger fs-3"></i></label>
-                                <label class="mx-1 text-center"><input type="radio" name="rb_hijo_avatar" value="5"> <br><i class="bi bi-brightness-high-fill text-info fs-3"></i></label>
+                            <label class="form-label fw-bold text-dark d-block">1. Selecciona tu Avatar Mágico:</label>
+                            <div class="selector-visual-grid">
+                                <% for(int i=1; i<=5; i++) { %>
+                                    <label class="opcion-visual-item" title="Avatar <%=i%>">
+                                        <input type="radio" name="rb_hijo_avatar" value="<%=i%>" <%=(i==1)?"checked":""%> required>
+                                        <img src="https://xpxcidh4nv94qxjy.public.blob.vercel-storage.com/img/avatar/avatar<%=i%>.png" alt="Opción Avatar <%=i%>">
+                                    </label>
+                                <% } %>
                             </div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="instrumentoFav" class="form-label">Preferencia / Instrumento Favorito:</label>
-                            <select class="form-select" id="instrumentoFav" name="sl_hijo_instrumento">
-                                <option value="1">🎹 Piano Mágico</option>
-                                <option value="2" selected>🥁 Tambor Divertido</option>
-                                <option value="3">🎵 Xilófono de Colores</option>
-                                <option value="4">🪇 Maracas Rítmicas</option>
-                                <option value="5">🎸 Guitarra Pequeña</option>
-                            </select>
+                            <label class="form-label fw-bold text-dark d-block">2. Elige tu Instrumento Favorito:</label>
+                            <div class="selector-visual-grid">
+                                <% 
+                                    String[] nombresInst = {"Guitarra", "Piano", "Tambor", "Xilófono", "Maracas"};
+                                    for(int j=1; j<=5; j++) { 
+                                %>
+                                    <label class="opcion-visual-item" title="<%= nombresInst[j-1] %>">
+                                        <input type="radio" name="sl_hijo_instrumento" value="<%=j%>" <%=(j==2)?"checked":""%>>
+                                        <img src="https://xpxcidh4nv94qxjy.public.blob.vercel-storage.com/img/instruments/instruments<%=j%>.png" alt="<%= nombresInst[j-1] %>">
+                                    </label>
+                                <% } %>
+                            </div>
                         </div>
                         
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary boton-accessible" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success boton-accessible">Crear Cuenta Infantil</button>
+                    <div class="modal-footer border-top-0 p-4 justify-content-center gap-2">
+                        <button type="button" class="btn btn-secondary px-4 py-2 fw-bold" data-bs-dismiss="modal" style="border-radius: 12px; min-height: 48px;">Cancelar</button>
+                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold" style="border-radius: 12px; min-height: 48px; background-color: #48bb78; border: none;">¡Crear Cuenta Infantil!</button>
                     </div>
                 </form>
                 
@@ -152,10 +150,25 @@
     </div>
 
     <script>
+        // 1. FUNCIÓN INTERACTIVA DEL BOTÓN (Guarda el estado localmente)
         function cambiarContraste() {
-            document.body.classList.toggle('modo-alto-contraste');
+            let activo = document.body.classList.toggle('modo-alto-contraste');
+            if (activo) {
+                localStorage.setItem('altoContraste', 'activado');
+            } else {
+                localStorage.setItem('altoContraste', 'desactivado');
+            }
         }
 
+        // 2. COMPROBACIÓN INMEDIATA AL CARGAR LA PÁGINA (Evita parpadeos de diseño)
+        document.addEventListener("DOMContentLoaded", function() {
+            let estadoContraste = localStorage.getItem('altoContraste');
+            if (estadoContraste === 'activado') {
+                document.body.classList.add('modo-alto-contraste');
+            }
+        });
+
+        // 3. ASISTENTE DE VOZ INTEGRADO
         function reproducirVoz(mensaje) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -165,7 +178,6 @@
             }
         }
     </script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
