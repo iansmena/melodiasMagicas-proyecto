@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.productos.datos.Conexion" %>
-<%@ page import="com.productos.datos.AdminDAO" %>
+<%@ page import="com.melodiasmagicas.datos.Conexion" %>
+<%@ page import="com.melodiasmagicas.datos.AdminDAO" %>
 <%@ page import="java.sql.ResultSet" %>
 
 <%

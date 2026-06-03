@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.productos.seguridad.Usuario" %>
+<%@ page import="com.melodiasmagicas.seguridad.Usuario" %>
 
 <%
     String correo = request.getParameter("txt_correo");

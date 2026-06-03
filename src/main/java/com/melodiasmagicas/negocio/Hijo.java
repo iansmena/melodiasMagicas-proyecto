@@ -1,8 +1,9 @@
-package com.productos.negocio;
+package com.melodiasmagicas.negocio;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import com.productos.datos.Conexion;
+
+import com.melodiasmagicas.datos.Conexion;
 
 public class Hijo {
     private int idHijo;

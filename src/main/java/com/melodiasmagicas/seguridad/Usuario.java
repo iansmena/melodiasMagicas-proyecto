@@ -1,7 +1,8 @@
-package com.productos.seguridad;
+package com.melodiasmagicas.seguridad;
 
 import java.sql.PreparedStatement;
-import com.productos.datos.Conexion;
+
+import com.melodiasmagicas.datos.Conexion;
 
 public class Usuario {
     private String correo;

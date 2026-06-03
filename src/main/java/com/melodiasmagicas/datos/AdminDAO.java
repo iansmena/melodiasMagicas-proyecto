@@ -1,4 +1,4 @@
-package com.productos.datos;
+package com.melodiasmagicas.datos;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
